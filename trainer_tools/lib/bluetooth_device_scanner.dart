@@ -161,6 +161,7 @@ class _BluetoothDeviceScannerState extends State<BluetoothDeviceScanner> {
 
   SnackBar _connectToDeviceSnackBar({required String deviceName}) {
     return SnackBar(
+      backgroundColor: Theme.of(context).primaryColor,
       duration: Duration(seconds: 10),
       content: Row(
         mainAxisSize: MainAxisSize.min,
@@ -169,7 +170,7 @@ class _BluetoothDeviceScannerState extends State<BluetoothDeviceScanner> {
               width: MediaQuery.of(context).size.width / 6,
               height: 20,
               child: LoadingIndicator(
-                indicatorType: Indicator.ballPulse,
+                indicatorType: Indicator.lineScale,
                 color: Colors.white,
               )),
           Expanded(
@@ -194,6 +195,7 @@ class _BluetoothDeviceScannerState extends State<BluetoothDeviceScanner> {
           .connect()
           .onError((error, stackTrace) =>
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                backgroundColor: Theme.of(context).primaryColor,
                 content: Text(
                     "Ein unbekannter Fehler ist aufgetreten. Bitte versuch es erneut."),
               ))));
@@ -214,12 +216,15 @@ class _BluetoothDeviceScannerState extends State<BluetoothDeviceScanner> {
             .then((wasSuccessful) {
           if (wasSuccessful) {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              backgroundColor: Theme.of(context).primaryColor,
               content: Text("Beacon erfolgreich beschrieben!"),
             ));
             _refreshController.requestRefresh();
           } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("Fehler beim schreiben des Beacons.")));
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text("Fehler beim schreiben des Beacons."),
+              backgroundColor: Theme.of(context).primaryColor,
+            ));
           }
           device.disconnect();
         });
@@ -231,6 +236,7 @@ class _BluetoothDeviceScannerState extends State<BluetoothDeviceScanner> {
       ScaffoldMessenger.of(context)
         ..removeCurrentSnackBar()
         ..showSnackBar(SnackBar(
+            backgroundColor: Theme.of(context).primaryColor,
             duration: Duration(seconds: 10),
             content: Text(
                 "Verbindung mit diesem Gerät nicht möglich. Handelt es sich dabei um einen dPS Beacon? Falls ja, versuche es erneut. Wenn das Problem besteht, wende Dich bitte an einen Administrator. ")));

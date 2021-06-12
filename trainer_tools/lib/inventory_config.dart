@@ -47,8 +47,10 @@ class _InventoryConfigState extends State<InventoryConfig> {
     setState(() {
       _write = false;
     });
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text("Tag erfolgreich beschrieben!")));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text("Tag erfolgreich beschrieben!"),
+      backgroundColor: Theme.of(context).primaryColor,
+    ));
     Navigator.of(context).pop();
   }
 
