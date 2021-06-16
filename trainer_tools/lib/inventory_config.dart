@@ -13,7 +13,8 @@ class InventoryConfig extends StatefulWidget {
 }
 
 class _InventoryConfigState extends State<InventoryConfig> {
-  int _selectedID = 0;
+  int _selectedSetID = 0;
+  int _selectedInstanceID = 0;
   bool _write = false;
 
   @override
@@ -43,7 +44,9 @@ class _InventoryConfigState extends State<InventoryConfig> {
   }
 
   void _writeToNdefTag(Ndef ndef) {
-    ndef.write(NdefMessage([NdefRecord.createText("entity-$_selectedID")]));
+    ndef.write(NdefMessage([
+      NdefRecord.createText("container-$_selectedSetID-$_selectedInstanceID")
+    ]));
     setState(() {
       _write = false;
     });
@@ -59,18 +62,22 @@ class _InventoryConfigState extends State<InventoryConfig> {
         .popUntil((route) => route.settings.name == "inventory_config");
     final rawMessage = ndef.cachedMessage?.records.first.payload;
     String? parsedMessage;
-    int? entityID;
+    int? setID;
+    int? instanceID;
     if (rawMessage != null) {
       parsedMessage = utf8.decode(rawMessage.toList().sublist(3));
-      if (parsedMessage.startsWith("entity-")) {
-        entityID = int.tryParse(parsedMessage.split("-")[1]);
-        if (entityID != null)
+      if (parsedMessage.startsWith("container-")) {
+        setID = int.tryParse(parsedMessage.split("-")[1]);
+        instanceID = int.tryParse(parsedMessage.split("-")[2]);
+        if (setID != null && instanceID != null)
           setState(() {
-            _selectedID = entityID!;
+            _selectedSetID = setID!;
+            _selectedInstanceID = instanceID!;
           });
       }
     }
-    _showConfigureTagDialog(tagEntityID: entityID, tagData: parsedMessage);
+    _showConfigureTagDialog(
+        setID: setID, instanceID: instanceID, tagData: parsedMessage);
   }
 
   void _showNfcNotSupportedDialog() {
@@ -83,7 +90,8 @@ class _InventoryConfigState extends State<InventoryConfig> {
             ));
   }
 
-  void _showConfigureTagDialog({required int? tagEntityID, String? tagData}) {
+  void _showConfigureTagDialog(
+      {required int? setID, required int? instanceID, String? tagData}) {
     showDialog(
         context: context,
         builder: (context) {
@@ -93,9 +101,9 @@ class _InventoryConfigState extends State<InventoryConfig> {
                     content: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        (tagEntityID != null)
+                        (setID != null && instanceID != null)
                             ? Text(
-                                "Auf diesem NFC-Chip ist bereits das Inventar mit der ID $tagEntityID kodiert. Möchtest Du ihn wirklich überschreiben?\n\n")
+                                "Auf diesem NFC-Chip ist bereits das Inventar $instanceID des Sets $setID kodiert. Möchtest Du den chip wirklich überschreiben?\n\n")
                             : (tagData != null)
                                 ? Column(
                                     children: [
@@ -112,13 +120,24 @@ class _InventoryConfigState extends State<InventoryConfig> {
                                   )
                                 : Container(),
                         Text(
-                            "Wähle die ID des Inventars aus, mit dem der Tag beschrieben werden soll."),
+                            "Wähle die Set-ID des Inventars aus, mit dem der Tag beschrieben werden soll."),
                         NumberPicker(
-                          value: _selectedID,
+                          value: _selectedSetID,
                           minValue: 0,
                           maxValue: 9999,
                           onChanged: (value) {
-                            setState(() => _selectedID = value);
+                            setState(() => _selectedSetID = value);
+                          },
+                          axis: Axis.horizontal,
+                        ),
+                        Text(
+                            "Wähle die Instanz-ID des Inventars aus, mit dem der Tag beschrieben werden soll."),
+                        NumberPicker(
+                          value: _selectedInstanceID,
+                          minValue: 0,
+                          maxValue: 9999,
+                          onChanged: (value) {
+                            setState(() => _selectedInstanceID = value);
                           },
                           axis: Axis.horizontal,
                         )
